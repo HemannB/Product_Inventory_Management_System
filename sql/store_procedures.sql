@@ -39,17 +39,20 @@ VALUES (p_product_id, 'OUT', p_quantity);
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION GetStockLevel(p_product_id INT)
-RETURNS INT
+CREATE OR REPLACE PROCEDURE GetStockLevel(
+    p_product_id INT,
+    OUT p_stock INT
+)
 LANGUAGE plpgsql
 AS $$
-DECLARE
-v_stock INT;
 BEGIN
-SELECT quantity INTO v_stock
+SELECT quantity INTO p_stock
 FROM inventory
 WHERE product_id = p_product_id;
 
-RETURN COALESCE(v_stock, 0);
+IF p_stock IS NULL THEN
+        p_stock := 0;
+END IF;
 END;
 $$;
+
