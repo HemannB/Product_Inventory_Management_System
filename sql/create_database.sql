@@ -1,0 +1,3 @@
+DROP DATABASE IF EXISTS estoque_db;
+CREATE DATABASE estoque_db;
+
