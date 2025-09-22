@@ -1,20 +1,19 @@
 package br.com.estoque.load;
 
 import br.com.estoque.db.DatabaseConnection;
-import com.github.javafaker.Faker;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Locale;
+import java.util.Random;
 
-public class ProductLoader {
+public class InventoryLoader {
 
     private static final int BATCH_SIZE = 5000;
 
-    public static void loadProducts(int totalProducts) {
-        Faker faker = new Faker(new Locale("en-US"));
-        String sql = "INSERT INTO products (name, description, unit_price) VALUES (?, ?, ?)";
+    public static void loadInventory(int totalProducts) {
+        String sql = "INSERT INTO inventory (product_id, quantity) VALUES (?, ?)";
+        Random random = new Random();
 
         long start = System.currentTimeMillis();
 
@@ -24,20 +23,17 @@ public class ProductLoader {
             conn.setAutoCommit(false);
 
             for (int i = 1; i <= totalProducts; i++) {
-                String name = faker.commerce().productName();
-                String description = faker.lorem().sentence();
-                double price = Double.parseDouble(faker.commerce().price().replace(",", "."));
+                int quantity = random.nextInt(500) + 1; // estoque inicial de 1 a 500
 
-                pstmt.setString(1, name);
-                pstmt.setString(2, description);
-                pstmt.setDouble(3, price);
+                pstmt.setInt(1, i);
+                pstmt.setInt(2, quantity);
                 pstmt.addBatch();
 
                 if (i % BATCH_SIZE == 0) {
                     pstmt.executeBatch();
                     conn.commit();
                     pstmt.clearBatch();
-                    System.out.println("Inseridos " + i + " produtos...");
+                    System.out.println("Estoque inicial inserido para " + i + " produtos...");
                 }
             }
 
@@ -45,7 +41,7 @@ public class ProductLoader {
             conn.commit();
 
             long end = System.currentTimeMillis();
-            System.out.println("Inserção de " + totalProducts + " produtos concluída em " + (end - start) / 1000.0 + "s");
+            System.out.println("Estoque inicial carregado em " + (end - start) / 1000.0 + "s");
 
         } catch (SQLException e) {
             e.printStackTrace();
